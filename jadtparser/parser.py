@@ -127,11 +127,6 @@ def infer_dateformat_ja(text: str) -> str:
         "second": _SECOND_PARTITIONS,
         "microsecond": _MICROSECOND_PARTITIONS
     })
-    # define all_allowance_partitions
-    all_allowance_partitions = list()
-    for pts in allowance_partitions_map.values():
-        all_allowance_partitions += pts
-    all_allowance_partitions = set(all_allowance_partitions)
 
     # validate partitions
     num_invalid_partitions = 0
