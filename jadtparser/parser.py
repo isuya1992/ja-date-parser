@@ -3,6 +3,7 @@
 """
 
 from abc import ABCMeta, abstractmethod
+from collections import OrderedDict
 from datetime import datetime, date
 import dateutil.parser
 import re
@@ -115,33 +116,45 @@ def infer_dateformat_ja(text: str) -> str:
 
     """
 
-    _, partitions = _parse(text)
+    parsed_result, partitions = _parse(text)
+
+    allowance_partitions_map = OrderedDict({
+        "year": _YEAR_PARTITIONS,
+        "month": _MONTH_PARTITIONS,
+        "day": _DAY_PARTITIONS,
+        "hour": _HOUR_PARTITIONS,
+        "minute": _MINUTE_PARTITIONS,
+        "second": _SECOND_PARTITIONS,
+        "microsecond": _MICROSECOND_PARTITIONS
+    })
+    # define all_allowance_partitions
+    all_allowance_partitions = list()
+    for pts in allowance_partitions_map.values():
+        all_allowance_partitions += pts
+    all_allowance_partitions = set(all_allowance_partitions)
 
     # validate partitions
     num_invalid_partitions = 0
-    if (not partitions["year"]) or (partitions["year"] not in _YEAR_PARTITIONS):
-        num_invalid_partitions += 1
-    if (not partitions["month"]) or (partitions["month"] not in _MONTH_PARTITIONS):
-        num_invalid_partitions += 1
-    if (not partitions["day"]) or (partitions["day"] not in _DAY_PARTITIONS):
-        num_invalid_partitions += 1
-    if partitions["hour"] and (partitions["hour"] not in _HOUR_PARTITIONS):
-        num_invalid_partitions += 1
-    if partitions["minute"] and (partitions["minute"] not in _MINUTE_PARTITIONS):
-        num_invalid_partitions += 1
-    if partitions["second"] and (partitions["second"] not in _SECOND_PARTITIONS):
-        num_invalid_partitions += 1
-    if partitions["microsecond"] and (partitions["microsecond"] not in _MICROSECOND_PARTITIONS):
-        num_invalid_partitions += 1
+    for key, allowance_partitions in allowance_partitions_map.items():
+        digit = parsed_result[key]
+        pt = partitions[key]
+        if digit:
+            if not pt:
+                num_invalid_partitions += 1
+            elif pt not in allowance_partitions:
+                num_invalid_partitions += 1
 
     if num_invalid_partitions > 0:
         raise ValueError(f"Cannot infer a format from the given text: {text}")
 
     # make format string
     inferred_format = ""
-    inferred_format += r"%Y" + partitions["year"]
-    inferred_format += r"%m" + partitions["month"]
-    inferred_format += r"%d" + partitions["day"]
+    if partitions["year"]:
+        inferred_format += r"%Y" + partitions["year"]
+    if partitions["month"]:
+        inferred_format += r"%m" + partitions["month"]
+    if partitions["day"]:
+        inferred_format += r"%d" + partitions["day"]
     if partitions["hour"]:
         inferred_format += r"%H" + partitions["hour"]
     if partitions["minute"]:

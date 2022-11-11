@@ -40,22 +40,24 @@ def test_infer_dateformat_ja_ymdhmf():
 def test_infer_dateformat_ja_md():
     input_ = "10月30日"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)
 
 def test_infer_dateformat_ja_y():
     input_ = "2022年"
-    with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+    excepted = "%Y年"
+    result = jadtparser.infer_dateformat_ja(input_)
+    assert result == excepted
 
 def test_infer_dateformat_ja_ym():
     input_ = "2022年10月"
-    with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+    excepted = "%Y年%m月"
+    result = jadtparser.infer_dateformat_ja(input_)
+    assert result == excepted
 
 def test_infer_dateformat_ja_hms():
     input_ = "9時30分20秒"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)
 
 def test_infer_dateformat_ja_ymdhms_invalid_y():
     input_ = "2022ねん10月30日9時30分20.000000秒"
