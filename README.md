@@ -10,6 +10,17 @@ pip install ja-date-parser
 
 ## Usage
 
+### jadtparser.infer_dateformat_ja
+
+```python
+>>> import jadtparser
+>>> 
+>>> jadtparser.infer_dateformat_ja("2022年11月1日9時30分")
+'%Y年%m月%d日%H時%M分'
+```
+
+### to_datetime/to_date
+
 ```python
 >>> import jadtparser
 >>> 
