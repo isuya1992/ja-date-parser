@@ -102,11 +102,16 @@ def _parse(text: str) -> tuple[dict[str, str], dict[str, str]]:
 def infer_dateformat_ja(text: str) -> str:
     """Infer the date format of a given text in Japanese style.
 
+    This method parse texts which start year.
+
     Args:
         text (str): A date format text in Japanese style
 
     Returns:
         str: A Inferred Python date format
+
+    Raises:
+        ValueError: if invalid any date separators are given.
 
     """
 
@@ -152,7 +157,8 @@ def infer_dateformat_ja(text: str) -> str:
 def to_datetime(text: str) -> datetime:
     """Parse and convert a given text to a datetime object.
 
-    If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
+    * If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
+    * If missing month or day digits in a text, then assign 1 as thier value.
 
     Args:
         text (str): A date format text in Japanese style
@@ -178,7 +184,8 @@ def to_datetime(text: str) -> datetime:
 def to_date(text: str) -> date:
     """Parse and convert a given text to a date object.
 
-    If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
+    * If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
+    * If missing month or day digits in a text, then assign 1 as thier value.
 
     Args:
         text (str): A date format text in Japanese style
