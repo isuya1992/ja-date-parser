@@ -4,6 +4,7 @@
 
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
+from collections.abc import Iterable
 from datetime import datetime, date
 import dateutil.parser
 import dateutil.tz
@@ -96,13 +97,38 @@ def _parse(text: str) -> tuple[dict[str, str], dict[str, str]]:
     return parsed_result, partitions
 
 
+def _infer_dateformat_ja_all(texts: Iterable[str]) -> list[str]:
+    """Infer a date format for list-like object of date-format texts in Japanese style
+
+    This method parse texts which start year.
+
+    Args:
+        texts (Iterable[str]): A date format text in Japanese style
+
+    Returns:
+        list[str]: A list of appeared date-formats
+
+    Raises:
+        ValueError: if invalid any date separators are given.
+
+    """
+
+    inferred_formats = list()
+    for t in texts:
+        fmt = infer_dateformat_ja(t)
+        if fmt not in inferred_formats:
+            inferred_formats.append(fmt)
+
+    return inferred_formats
+
+
 # ********************
 # public functions
 # ********************
 
 
 def infer_dateformat_ja(text: str) -> str:
-    """Infer the date format of a given text in Japanese style.
+    """Infer a date format of a given text in Japanese style
 
     This method parse texts which start year.
 
@@ -113,7 +139,7 @@ def infer_dateformat_ja(text: str) -> str:
         str: A Inferred Python date format
 
     Raises:
-        ValueError: if invalid any date separators are given.
+        ValueError: If invalid any date separators are given
 
     """
 
@@ -163,7 +189,11 @@ def infer_dateformat_ja(text: str) -> str:
     return inferred_format
 
 
-def to_datetime(text: str, with_tz: bool = False, tz_name: str = "Asia/Tokyo") -> datetime:
+def to_datetime(
+    text: str | Iterable[str],
+    with_tz: bool = False,
+    tz_name: str = "Asia/Tokyo"
+) -> datetime | list[datetime]:
     """Parse and convert a given text to a datetime object.
 
     * If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
@@ -175,25 +205,58 @@ def to_datetime(text: str, with_tz: bool = False, tz_name: str = "Asia/Tokyo") -
         tz_name (str): Time zone name. This is valid if `with_tz` = True.
 
     Returns:
-        datetime.datetime: A parsed datetime object.
+        datetime.datetime | list[datetime.datetime]: Parsed datetime objects
+
+    Raises:
+        ValueError: If extsts multi formats in given texts
+        TypeError: If an invalid type arg is given
 
     """
 
-    try:
-        inferred_format = infer_dateformat_ja(text)
-    except ValueError:
-        inferred_format = None
+    tz_obj = dateutil.tz.gettz(tz_name)
+    out_obj: datetime | list[datetime]
 
-    if inferred_format is not None:
-        dt_obj = datetime.strptime(text, inferred_format)
+    if isinstance(text, str):
+        try:
+            inferred_format = infer_dateformat_ja(text)
+        except ValueError:
+            inferred_format = None  # Imply not Japanese or invalid format
+
+        if inferred_format is not None:
+            dt_obj = datetime.strptime(text, inferred_format)
+        else:
+            dt_obj = dateutil.parser.parse(text)
+
+        if with_tz:
+            dt_obj = dt_obj.replace(tzinfo=tz_obj)
+
+        out_obj = dt_obj
+
+    elif isinstance(text, Iterable):
+        inferred_format_list = list()
+        try:
+            inferred_format_list += _infer_dateformat_ja_all(text)
+            if len(inferred_format_list) != 1:
+                raise ValueError("Cannot infer ONE date-format")
+            inferred_format = inferred_format_list[0]
+        except ValueError:
+            inferred_format = None   # Imply not Japanese or invalid forma
+
+        out_obj = list()
+        for t in text:
+            if inferred_format is not None:
+                dt_obj = datetime.strptime(t, inferred_format)
+            else:
+                dt_obj = dateutil.parser.parse(t)
+
+            if with_tz:
+                dt_obj = dt_obj.replace(tzinfo=tz_obj)
+
+            out_obj.append(dt_obj)
     else:
-        dt_obj = dateutil.parser.parse(text)
+        raise TypeError("Invalid type")
 
-    if with_tz:
-        tz_obj = dateutil.tz.gettz(tz_name)
-        dt_obj = dt_obj.replace(tzinfo=tz_obj)
-
-    return dt_obj
+    return out_obj
 
 
 def to_date(text: str) -> date:
@@ -206,10 +269,18 @@ def to_date(text: str) -> date:
         text (str): A date format text in Japanese style
 
     Returns:
-        datetime.date: A parsed date object.
+        datetime.date: A parsed date object
 
     """
 
     dt_obj = to_datetime(text)
+    out_obj: datetime | list[datetime]
 
-    return dt_obj.date()
+    if isinstance(dt_obj, datetime):
+        out_obj = dt_obj.date()
+    else:
+        out_obj = list()
+        for dt in dt_obj:
+            out_obj.append(dt.date())
+
+    return out_obj
