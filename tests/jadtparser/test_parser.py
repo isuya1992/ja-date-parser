@@ -2,6 +2,7 @@ import pytest
 import jadtparser
 
 from datetime import datetime, date
+import dateutil.tz
 
 
 # ****************************
@@ -109,6 +110,18 @@ def test_to_datetime_ja_ymdhmf():
     input_ = "2022年10月30日9時30分20.000000秒"
     excepted = datetime(2022, 10, 30, 9, 30, 20, 0)
     result = jadtparser.to_datetime(input_)
+    assert result == excepted
+
+def test_to_datetime_ja_ymdhm_withtz():
+    input_ = "2022年10月30日9時30分20秒"
+    excepted = datetime(2022, 10, 30, 9, 30, 20, 0, dateutil.tz.gettz("Asia/Tokyo"))
+    result = jadtparser.to_datetime(input_, with_tz=True)
+    assert result == excepted
+
+def test_to_datetime_ja_ymdhm_withtz_utc():
+    input_ = "2022年10月30日9時30分20秒"
+    excepted = datetime(2022, 10, 30, 9, 30, 20, 0, dateutil.tz.gettz("UTC"))
+    result = jadtparser.to_datetime(input_, with_tz=True, tz_name="UTC")
     assert result == excepted
 
 def test_to_datetime_notja():

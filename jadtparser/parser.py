@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from datetime import datetime, date
 import dateutil.parser
+import dateutil.tz
 import re
 
 # ********************
@@ -162,7 +163,7 @@ def infer_dateformat_ja(text: str) -> str:
     return inferred_format
 
 
-def to_datetime(text: str) -> datetime:
+def to_datetime(text: str, with_tz: bool = False, tz_name: str = "Asia/Tokyo") -> datetime:
     """Parse and convert a given text to a datetime object.
 
     * If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
@@ -170,6 +171,8 @@ def to_datetime(text: str) -> datetime:
 
     Args:
         text (str): A date format text in Japanese style
+        with_tz (bool): Whether or not append timezone from `tz_name` to datetime
+        tz_name (str): Time zone name. This is valid if `with_tz` = True.
 
     Returns:
         datetime.datetime: A parsed datetime object.
@@ -185,6 +188,10 @@ def to_datetime(text: str) -> datetime:
         dt_obj = datetime.strptime(text, inferred_format)
     else:
         dt_obj = dateutil.parser.parse(text)
+
+    if with_tz:
+        tz_obj = dateutil.tz.gettz(tz_name)
+        dt_obj = dt_obj.replace(tzinfo=tz_obj)
 
     return dt_obj
 
