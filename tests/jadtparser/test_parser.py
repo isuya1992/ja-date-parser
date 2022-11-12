@@ -1,9 +1,6 @@
 import pytest
 import jadtparser
 
-from datetime import datetime, date
-import dateutil.tz
-
 
 # ****************************
 # test infer_dateformat_ja
@@ -63,146 +60,34 @@ def test_infer_dateformat_ja_hms():
 def test_infer_dateformat_ja_ymdhms_invalid_y():
     input_ = "2022ねん10月30日9時30分20.000000秒"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)
 
 def test_infer_dateformat_ja_ymdhms_invalid_month():
     input_ = "2022年10がつ30日9時30分20.000000秒"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)
 
 def test_infer_dateformat_ja_ymdhms_invalid_d():
     input_ = "2022年10月30にち9時30分20.000000秒"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)
 
 def test_infer_dateformat_ja_ymdhms_invalid_h():
     input_ = "2022年10月30日9じ30分20.000000秒"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)
 
 def test_infer_dateformat_ja_ymdhms_invalid_minute():
     input_ = "2022年10月30日9時30ふん20.000000秒"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)
 
 def test_infer_dateformat_ja_ymdhms_invalid_s():
     input_ = "2022年10月30日9時30分20びょう"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)
 
 def test_infer_dateformat_ja_ymdhms_invalid_microsecond():
     input_ = "2022年10月30日9時30分20秒000000ミリ秒"
     with pytest.raises(ValueError):
-        result = jadtparser.infer_dateformat_ja(input_)  # noqa
-
-
-# ****************************
-# test to_datetime
-# ****************************
-
-def test_to_datetime_ja_ymd():
-    input_ = "2022年10月30日"
-    excepted = datetime(2022, 10, 30)
-    result = jadtparser.to_datetime(input_)
-    assert result == excepted
-
-def test_to_datetime_ja_ymdhmf():
-    input_ = "2022年10月30日9時30分20.000000秒"
-    excepted = datetime(2022, 10, 30, 9, 30, 20, 0)
-    result = jadtparser.to_datetime(input_)
-    assert result == excepted
-
-def test_to_datetime_ja_ymdhms_withtz():
-    input_ = "2022年10月30日9時30分20秒"
-    excepted = datetime(2022, 10, 30, 9, 30, 20, 0, dateutil.tz.gettz("Asia/Tokyo"))
-    result = jadtparser.to_datetime(input_, with_tz=True)
-    assert result == excepted
-
-def test_to_datetime_ja_ymdhms_withtz_utc():
-    input_ = "2022年10月30日9時30分20秒"
-    excepted = datetime(2022, 10, 30, 9, 30, 20, 0, dateutil.tz.gettz("UTC"))
-    result = jadtparser.to_datetime(input_, with_tz=True, tz_name="UTC")
-    assert result == excepted
-
-def test_to_datetime_notja():
-    input_ = "20221030T093020"
-    excepted = datetime(2022, 10, 30, 9, 30, 20, 0)
-    result = jadtparser.to_datetime(input_)
-    assert result == excepted
-
-def test_to_datetime_ja_ymdhms_list():
-    input_ = [
-        "2022年10月30日9時30分20秒",
-        "2022年11月30日9時30分20秒"
-    ]
-    excepted = [
-        datetime(2022, 10, 30, 9, 30, 20, 0),
-        datetime(2022, 11, 30, 9, 30, 20, 0),
-    ]
-    result = jadtparser.to_datetime(input_)
-    assert result == excepted
-
-def test_to_datetime_notja_ymdhms_list():
-    input_ = [
-        "20221030T093020",
-        "20221130T093020"
-    ]
-    excepted = [
-        datetime(2022, 10, 30, 9, 30, 20, 0),
-        datetime(2022, 11, 30, 9, 30, 20, 0),
-    ]
-    result = jadtparser.to_datetime(input_)
-    assert result == excepted
-
-def test_to_datetime_ja_ymdhms_list_multifmts():
-    input_ = [
-        "2022年10月30日9時30分20秒",
-        "2022年11月30日9:30:20"
-    ]
-    with pytest.raises(ValueError):
-        jadtparser.to_datetime(input_)
-
-def test_to_datetime_invalid():
-    input_ = "二〇二二年十月三〇日"
-    with pytest.raises(ValueError):
-        result = jadtparser.to_datetime(input_)  # noqa
-
-
-# ****************************
-# test to_date
-# ****************************
-
-def test_to_date_ja_ymd():
-    input_ = "2022年10月30日"
-    excepted = date(2022, 10, 30)
-    result = jadtparser.to_date(input_)
-    assert result == excepted
-
-def test_to_date_ja_ymd_list():
-    input_ = [
-        "2022年10月30日9時30分20秒",
-        "2022年11月30日9時30分20秒"
-    ]
-    excepted = [
-        date(2022, 10, 30),
-        date(2022, 11, 30),
-    ]
-    result = jadtparser.to_date(input_)
-    assert result == excepted
-
-def test_to_date_ja_ymdhmf():
-    input_ = "2022年10月30日9時30分20.000000秒"
-    excepted = date(2022, 10, 30)
-    result = jadtparser.to_date(input_)
-    assert result == excepted
-
-def test_to_date_notja():
-    input_ = "20221030T093020"
-    excepted = date(2022, 10, 30)
-    result = jadtparser.to_date(input_)
-    assert result == excepted
-
-def test_to_date_invalid():
-    input_ = "二〇二二年十月三〇日"
-    with pytest.raises(ValueError):
-        result = jadtparser.to_date(input_)  # noqa
+        jadtparser.infer_dateformat_ja(input_)

@@ -7,7 +7,7 @@ import dateutil.parser
 import dateutil.tz
 from collections.abc import Iterable
 
-from .alias import StrOrIterable, DatetimeOrList, DateOrList
+from .alias import StrOrIterable, DatetimeOrList, DateOrList, TimeOrList
 from .parser import infer_dateformat_ja, infer_dateformat_ja_all
 
 
@@ -109,5 +109,31 @@ def to_date(text: StrOrIterable) -> DateOrList:
         out_obj = list()
         for dt in dt_obj:
             out_obj.append(dt.date())
+
+    return out_obj
+
+def to_time(text: StrOrIterable) -> TimeOrList:
+    """Parse and convert a given text to a time object.
+
+    * If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
+    * If missing month or day digits in a text, then assign 1 as thier value.
+
+    Args:
+        text (str): A date format text in Japanese style
+
+    Returns:
+        datetime.time or list[datetime.time]: A parsed date object
+
+    """
+
+    dt_obj = to_datetime(text)
+    out_obj: TimeOrList
+
+    if isinstance(dt_obj, datetime):
+        out_obj = dt_obj.time()
+    else:
+        out_obj = list()
+        for dt in dt_obj:
+            out_obj.append(dt.time())
 
     return out_obj

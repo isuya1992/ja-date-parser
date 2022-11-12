@@ -2,7 +2,7 @@
 
 """
 
-from datetime import datetime, date
+from datetime import datetime, date, time
 from typing import Iterable
 
 
@@ -13,3 +13,4 @@ from typing import Iterable
 StrOrIterable = str | Iterable[str]
 DatetimeOrList = datetime | list[datetime]
 DateOrList = date | list[date]
+TimeOrList = time | list[time]
