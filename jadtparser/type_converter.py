@@ -16,18 +16,14 @@ from .parser import infer_dateformat_ja, infer_dateformat_ja_all
 # ********************
 
 
-def to_datetime(
-    text: StrOrIterable,
-    with_tz: bool = False,
-    tz_name: str = "Asia/Tokyo"
-) -> DatetimeOrList:
+def to_datetime(date: StrOrIterable, with_tz: bool = False, tz_name: str = "Asia/Tokyo") -> DatetimeOrList:
     """Parse and convert a given text to a datetime object.
 
     * If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
     * If missing month or day digits in a text, then assign 1 as thier value.
 
     Args:
-        text (str): A date format text in Japanese style
+        date (str): A date format text in Japanese style
         with_tz (bool): Whether or not append timezone from `tz_name` to datetime
         tz_name (str): Time zone name. This is valid if `with_tz` = True.
 
@@ -43,26 +39,26 @@ def to_datetime(
     tz_obj = dateutil.tz.gettz(tz_name)
     out_obj: DatetimeOrList
 
-    if isinstance(text, str):
+    if isinstance(date, str):
         try:
-            inferred_format = infer_dateformat_ja(text)
+            inferred_format = infer_dateformat_ja(date)
         except ValueError:
             inferred_format = None  # Imply not Japanese or invalid format
 
         if inferred_format is not None:
-            dt_obj = datetime.strptime(text, inferred_format)
+            dt_obj = datetime.strptime(date, inferred_format)
         else:
-            dt_obj = dateutil.parser.parse(text)
+            dt_obj = dateutil.parser.parse(date)
 
         if with_tz:
             dt_obj = dt_obj.replace(tzinfo=tz_obj)
 
         out_obj = dt_obj
 
-    elif isinstance(text, Iterable):
+    elif isinstance(date, Iterable):
         inferred_format_list = list()
         try:
-            inferred_format_list += infer_dateformat_ja_all(text)
+            inferred_format_list += infer_dateformat_ja_all(date)
             if len(inferred_format_list) != 1:
                 raise ValueError("Cannot infer ONE date-format")
             inferred_format = inferred_format_list[0]
@@ -70,11 +66,11 @@ def to_datetime(
             inferred_format = None   # Imply not Japanese or invalid forma
 
         out_obj = list()
-        for t in text:
+        for dtstr in date:
             if inferred_format is not None:
-                dt_obj = datetime.strptime(t, inferred_format)
+                dt_obj = datetime.strptime(dtstr, inferred_format)
             else:
-                dt_obj = dateutil.parser.parse(t)
+                dt_obj = dateutil.parser.parse(dtstr)
 
             if with_tz:
                 dt_obj = dt_obj.replace(tzinfo=tz_obj)
@@ -86,21 +82,21 @@ def to_datetime(
     return out_obj
 
 
-def to_date(text: StrOrIterable) -> DateOrList:
+def to_date(date: StrOrIterable) -> DateOrList:
     """Parse and convert a given text to a date object.
 
     * If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
     * If missing month or day digits in a text, then assign 1 as thier value.
 
     Args:
-        text (str): A date format text in Japanese style
+        date (str): A date format text in Japanese style
 
     Returns:
         datetime.date or list[datetime.date]: A parsed date object
 
     """
 
-    dt_obj = to_datetime(text)
+    dt_obj = to_datetime(date)
     out_obj: DateOrList
 
     if isinstance(dt_obj, datetime):
@@ -112,7 +108,7 @@ def to_date(text: StrOrIterable) -> DateOrList:
 
     return out_obj
 
-def to_time(text: StrOrIterable) -> TimeOrList:
+def to_time(date: StrOrIterable) -> TimeOrList:
     """Parse and convert a given text to a time object.
 
     * If it is failure to inffer a format in Japanese meaning, then parse text by dateutil.parser.
@@ -126,7 +122,7 @@ def to_time(text: StrOrIterable) -> TimeOrList:
 
     """
 
-    dt_obj = to_datetime(text)
+    dt_obj = to_datetime(date)
     out_obj: TimeOrList
 
     if isinstance(dt_obj, datetime):
