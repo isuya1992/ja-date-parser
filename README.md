@@ -16,7 +16,7 @@ pip install ja-date-parser
 
 * Convert a Japanese date-format text into the corresponding datetime.datetime object.
 * For a text with no Japanese date-format, this function try to parse it by dateutil.parser.
-  * See: [https://dateutil.readthedocs.io/en/stable/parser.html]
+  * See: <https://dateutil.readthedocs.io/en/stable/parser.html>
 * It is enable to append timezone.
 
 ```python
