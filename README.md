@@ -26,12 +26,12 @@ pip install ja-date-parser
 datetime.datetime(2022, 11, 1, 9, 30)
 >>> jadtparser.to_datetime("2022/11/1 9:30")
 datetime.datetime(2022, 11, 1, 9, 30)
->>> Append timezone
+>>> # Append timezone
 >>> jadtparser.to_datetime("2022年11月1日9時30分", with_tz=True)
 datetime.datetime(2022, 11, 1, 9, 30, tzinfo=tzfile('/usr/share/zoneinfo/Asia/Tokyo'))
 >>> jadtparser.to_datetime("2022年11月1日9時30分", with_tz=True, tz_name="UTC")
 datetime.datetime(2022, 11, 1, 9, 30, tzinfo=tzfile('/usr/share/zoneinfo/UTC'))
->>> For a text with no Japanese date-format
+>>> # For a text with no Japanese date-format
 >>> jadtparser.to_datetime("20221101093020")
 datetime.datetime(2022, 11, 1, 9, 30, 20)
 ```
